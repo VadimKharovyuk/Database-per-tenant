@@ -34,6 +34,7 @@ public class DebugController {
     }
 
 
+
     @GetMapping("/test-db/{tenantId}")
     public ResponseEntity<String> testDatabase(@PathVariable String tenantId) {
         try {

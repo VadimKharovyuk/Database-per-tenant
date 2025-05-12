@@ -1,18 +1,16 @@
 package com.example.databasepertenant.Service;
 
-import com.example.databasepertenant.model.User;
-import com.example.databasepertenant.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import com.example.databasepertenant.DataSource.TenantContext;
+import com.example.databasepertenant.dto.UserResponseDTO;
 
-import java.util.List;
-
-
+import com.example.databasepertenant.maper.UserMapper;
 import com.example.databasepertenant.model.Role;
 import com.example.databasepertenant.model.User;
 import com.example.databasepertenant.repository.RoleRepository;
 import com.example.databasepertenant.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -21,13 +19,14 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    @Getter
+    private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -64,5 +63,16 @@ public class UserService {
 
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
+    }
+
+    public List<UserResponseDTO> getAllUsersDto() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toResponseDto)
+                .toList();
+    }
+
+    public Optional<UserResponseDTO> getUserDtoById(Long id) {
+        return userRepository.findById(id)
+                .map(userMapper::toResponseDto);
     }
 }

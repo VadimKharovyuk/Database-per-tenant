@@ -1,22 +1,51 @@
 package com.example.databasepertenant.DataSource;
 
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
-import org.springframework.stereotype.Component;
-
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
 public class TenantAwareDataSource extends AbstractRoutingDataSource {
+
+    private final Map<Object, Object> tenantDataSources = new HashMap<>();
+
+    public TenantAwareDataSource(DataSource defaultDataSource) {
+        // Настраиваем defaultTargetDataSource
+        super.setDefaultTargetDataSource(defaultDataSource);
+
+        // Создаём и настраиваем начальные targetDataSources
+        tenantDataSources.put("default", defaultDataSource);
+        super.setTargetDataSources(new HashMap<>(tenantDataSources));
+
+        // Инициализируем
+        super.afterPropertiesSet();
+    }
+
     @Override
     protected Object determineCurrentLookupKey() {
-        return TenantContext.getTenantId();
+        String tenantId = TenantContext.getTenantId();
+        return tenantId != null ? tenantId : "default";
     }
 
     public void addTenant(String tenantId, DataSource dataSource) {
-        Map<Object, Object> dataSources = new HashMap<>(getResolvedDataSources());
-        dataSources.put(tenantId, dataSource);
-        setTargetDataSources(dataSources);
-        afterPropertiesSet();
+        // Добавляем в нашу карту
+        tenantDataSources.put(tenantId, dataSource);
+
+        // Обновляем карту источников данных в родительском классе
+        super.setTargetDataSources(new HashMap<>(tenantDataSources));
+
+        // Переинициализируем
+        super.afterPropertiesSet();
+    }
+
+    public void removeTenant(String tenantId) {
+        // Удаляем из нашей карты
+        tenantDataSources.remove(tenantId);
+
+        // Обновляем карту источников данных в родительском классе
+        super.setTargetDataSources(new HashMap<>(tenantDataSources));
+
+        // Переинициализируем
+        super.afterPropertiesSet();
     }
 }
