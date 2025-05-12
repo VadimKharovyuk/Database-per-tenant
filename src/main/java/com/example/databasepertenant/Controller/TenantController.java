@@ -38,6 +38,7 @@ public class TenantController {
         }
     }
 
+
     @GetMapping
     public ResponseEntity<List<Tenant>> getAllTenants() {
         return ResponseEntity.ok(tenantService.getAllTenants());
