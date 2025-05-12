@@ -42,13 +42,19 @@ public class UserService {
     }
 
     public User createUser(User user, Set<String> roleNames) {
-        // Найти роли по именам и добавить их пользователю
-        Set<Role> roles = new HashSet<>();
-        for (String roleName : roleNames) {
-            roleRepository.findByName(roleName).ifPresent(roles::add);
-        }
-        user.setRoles(roles);
+        Set<Role> userRoles = new HashSet<>();
 
+        // Найдем роли по их именам
+        if (roleNames != null && !roleNames.isEmpty()) {
+            for (String roleName : roleNames) {
+                roleRepository.findByName(roleName).ifPresent(userRoles::add);
+            }
+        } else {
+            // Если роли не указаны, добавим роль USER по умолчанию
+            roleRepository.findByName("USER").ifPresent(userRoles::add);
+        }
+
+        user.setRoles(userRoles);
         return userRepository.save(user);
     }
 

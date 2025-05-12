@@ -1,32 +1,48 @@
 package com.example.databasepertenant.model;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "services")
-@Data
+@Table(name = "bookings")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompanyService {
+public class Booking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "flight_id", nullable = false)
+    private Flight flight;
+
     @Column(nullable = false)
-    private String name;
-
-    private String description;
+    private String passengerName;
 
     @Column(nullable = false)
-    private BigDecimal price;
+    private String passengerEmail;
 
-    private boolean active = true;
+    @Column(nullable = false)
+    private String seatNumber;
+
+    @Column(nullable = false)
+    private BigDecimal paidAmount;
+
+    @Column(nullable = false)
+    private LocalDateTime bookingTime;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -37,6 +53,7 @@ public class CompanyService {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        bookingTime = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 

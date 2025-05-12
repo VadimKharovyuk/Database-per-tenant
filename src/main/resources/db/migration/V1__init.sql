@@ -28,21 +28,39 @@ CREATE TABLE user_roles (
 );
 
 -- Таблица услуг компании
-CREATE TABLE services (
+-- Таблица рейсов
+CREATE TABLE flights (
+                         id SERIAL PRIMARY KEY,
+                         flight_number VARCHAR(20) NOT NULL,
+                         departure_airport VARCHAR(100) NOT NULL,
+                         arrival_airport VARCHAR(100) NOT NULL,
+                         departure_time TIMESTAMP NOT NULL,
+                         arrival_time TIMESTAMP NOT NULL,
+                         available_seats INTEGER NOT NULL,
+                         base_price DECIMAL(10, 2) NOT NULL,
+                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица бронирований
+CREATE TABLE bookings (
                           id SERIAL PRIMARY KEY,
-                          name VARCHAR(100) NOT NULL,
-                          description TEXT,
-                          price DECIMAL(10, 2) NOT NULL,
-                          active BOOLEAN DEFAULT TRUE,
+                          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                          flight_id INTEGER REFERENCES flights(id) ON DELETE CASCADE,
+                          passenger_name VARCHAR(100) NOT NULL,
+                          passenger_email VARCHAR(100) NOT NULL,
+                          seat_number VARCHAR(10) NOT NULL,
+                          paid_amount DECIMAL(10, 2) NOT NULL,
+                          booking_time TIMESTAMP NOT NULL,
                           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Добавление нескольких услуг по умолчанию
-INSERT INTO services (name, description, price) VALUES
-                                                    ('Базовая подписка', 'Основной пакет услуг с ограниченным функционалом', 9.99),
-                                                    ('Стандартная подписка', 'Расширенный пакет услуг для малого бизнеса', 19.99),
-                                                    ('Премиум подписка', 'Полный доступ ко всем функциям системы', 49.99);
+-- Индексы для быстрого поиска
+CREATE INDEX idx_flights_departure ON flights(departure_time);
+CREATE INDEX idx_flights_airports ON flights(departure_airport, arrival_airport);
+CREATE INDEX idx_bookings_user ON bookings(user_id);
+CREATE INDEX idx_bookings_flight ON bookings(flight_id);
 
 -- Создание индексов для быстрого поиска
 CREATE INDEX idx_users_email ON users(email);

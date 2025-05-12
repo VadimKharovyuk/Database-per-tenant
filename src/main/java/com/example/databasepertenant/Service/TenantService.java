@@ -23,6 +23,7 @@ public class TenantService {
     public void createTenant(String tenantId, String dbName) {
         // Создаем новую БД - используем jdbcTemplate, который подключен к adminDataSource
         jdbcTemplate.execute("CREATE DATABASE " + dbName);
+        System.out.println("Создание тенанта с ID: [" + tenantId + "] и базой данных: [" + dbName + "]");
 
         // Создаем DataSource для новой БД
         HikariDataSource newDataSource = new HikariDataSource();

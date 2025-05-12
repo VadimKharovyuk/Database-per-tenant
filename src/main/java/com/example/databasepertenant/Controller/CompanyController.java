@@ -18,8 +18,14 @@ public class CompanyController {
 
     @PostMapping
     public ResponseEntity<String> registerCompany(@RequestBody CompanyRegistrationDTO company) {
-        String tenantId = company.getName().toLowerCase().replaceAll("\\s", "_");
+        // Удаляем лишние пробелы и преобразуем в нижний регистр
+        String cleanName = company.getName().trim().toLowerCase();
+        // Заменяем пробелы на подчеркивания
+        String tenantId = cleanName.replaceAll("\\s+", "_");
         String dbName = "db_" + tenantId;
+
+        System.out.println("Регистрация компании: [" + company.getName() + "], очищенное имя: [" + cleanName + "]");
+        System.out.println("ID тенанта: [" + tenantId + "], имя БД: [" + dbName + "]");
 
         tenantService.createTenant(tenantId, dbName);
 
