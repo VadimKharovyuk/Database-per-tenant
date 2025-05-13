@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // Публичные эндпоинты, доступные без аутентификации
-                        .requestMatchers("/api/auth/register", "/api/auth/login","/api/debug/**","/api/**")
+                        .requestMatchers("/api/auth/register", "/api/auth/login","/api/debug/**","/api/**","/")
                         .permitAll()
                         .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
                         // Эндпоинты для проверки состояния и документации API

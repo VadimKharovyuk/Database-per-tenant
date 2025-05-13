@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Авиационная платформа - Главная</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    .header {
+      background-color: #333;
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      margin: 0;
+    }
+    .nav-links {
+      display: flex;
+    }
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+    .nav-links a:hover {
+      background-color: #555;
+    }
+    .hero {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05');
+      background-size: cover;
+      background-position: center;
+      height: 500px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: white;
+      padding: 0 20px;
+    }
+    .hero h2 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      max-width: 800px;
+    }
+    .btn {
+      display: inline-block;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      padding: 12px 30px;
+      border-radius: 4px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    .tenant-section {
+      padding: 50px 20px;
+      text-align: center;
+    }
+    .tenant-section h3 {
+      margin-top: 0;
+      font-size: 2rem;
+      margin-bottom: 30px;
+    }
+    .tenant-cards {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .tenant-card {
+      background-color: white;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 300px;
+      transition: transform 0.3s;
+    }
+    .tenant-card:hover {
+      transform: translateY(-5px);
+    }
+    .tenant-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+    .tenant-card h4 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    .tenant-card p {
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1>Авиационная платформа</h1>
+  <div class="nav-links">
+    <a href="/">Главная</a>
+    <a href="/about">О нас</a>
+    <a href="/login">Войти</a>
+    <a href="/register">Регистрация</a>
+  </div>
+</div>
+
+<div class="hero">
+  <h2>Добро пожаловать в нашу авиационную платформу</h2>
+  <p>Мультитенантная система для управления авиакомпаниями и бронирования рейсов. Выберите вашу авиакомпанию и начните работу.</p>
+  <a href="#tenants" class="btn">Выбрать авиакомпанию</a>
+</div>
+
+<div id="tenants" class="tenant-section">
+  <h3>Доступные авиакомпании</h3>
+  <p>Выберите авиакомпанию для входа или регистрации в системе.</p>
+
+  <div class="tenant-cards">
+    <div class="tenant-card">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Turkish_Airlines_logo_2019.svg" alt="Turkish Airlines">
+      <h4>Turkish Airlines</h4>
+      <p>Флагманская авиакомпания Турции, крупнейший авиаперевозчик страны</p>
+      <a href="/login?tenantId=turkish_airlines" class="btn">Выбрать</a>
+    </div>
+
+    <div class="tenant-card">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/70/Pegasus_Airlines_logo.svg" alt="Pegasus Airlines">
+      <h4>Pegasus Airlines</h4>
+      <p>Pegasus Airlines - международная авиакомпания, бюджетный перевозчик Турции</p>
+      <a href="/login?tenantId=pegasus_airlines" class="btn">Выбрать</a>
+    </div>
+
+    <div class="tenant-card">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/SunExpress_logo.svg" alt="SunExpress">
+      <h4>SunExpress</h4>
+      <p>Совместное предприятие Turkish Airlines и Lufthansa, специализируется на туристических направлениях</p>
+      <a href="/login?tenantId=sunexpress" class="btn">Выбрать</a>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>&copy; 2025 Авиационная платформа. Все права защищены.</p>
+</div>
+</body>
+</html>

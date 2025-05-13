@@ -66,4 +66,9 @@ public class WebController {
 
         return "dashboard";
     }
+
+    @GetMapping()
+    public String index(Model model) {
+        return "home";
+    }
 }
