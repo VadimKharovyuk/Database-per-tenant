@@ -78,6 +78,73 @@
         .menu a:hover {
             background-color: #0069d9;
         }
+        .flight-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .flight-info {
+            flex: 1;
+        }
+        .flight-number {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .flight-route {
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .flight-time {
+            color: #333;
+        }
+        .flight-price {
+            font-weight: bold;
+            font-size: 18px;
+            color: #28a745;
+            margin-right: 15px;
+        }
+        .view-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .view-button:hover {
+            background-color: #0069d9;
+        }
+        .user-id-form {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .form-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .form-group input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -90,25 +157,53 @@
 </div>
 
 <div class="menu">
-    <a href="/flights">Рейсы</a>
-    <a href="/bookings">Мои бронирования</a>
-    <a href="/profile">Профиль</a>
+    <a th:href="@{/flights(tenantId=${tenantId})}">Рейсы</a>
+    <a href="#bookings">Мои бронирования</a>
+    <a href="#profile">Профиль</a>
 </div>
 
 <div class="main-content">
     <div class="dashboard-section">
         <h2>Добро пожаловать!</h2>
-        <p>Вы успешно вошли в систему. Выберите нужный раздел в меню выше.</p>
+        <p>Вы успешно вошли в систему авиакомпании <strong th:text="${tenantId}"></strong>. Выберите нужный раздел в меню выше.</p>
     </div>
 
     <div class="dashboard-section">
         <h2>Ближайшие рейсы</h2>
-        <p>Здесь будет отображаться информация о ближайших рейсах.</p>
+        <div class="flight-card">
+            <div class="flight-info">
+                <div class="flight-number">TK123</div>
+                <div class="flight-route">Стамбул (IST) → Москва (SVO)</div>
+                <div class="flight-time">15 мая, 10:30</div>
+            </div>
+            <div class="flight-price">12,500 руб.</div>
+            <a th:href="@{/flights(tenantId=${tenantId})}" class="view-button">Подробнее</a>
+        </div>
+        <div class="flight-card">
+            <div class="flight-info">
+                <div class="flight-number">TK456</div>
+                <div class="flight-route">Анталия (AYT) → Санкт-Петербург (LED)</div>
+                <div class="flight-time">16 мая, 14:15</div>
+            </div>
+            <div class="flight-price">15,800 руб.</div>
+            <a th:href="@{/flights(tenantId=${tenantId})}" class="view-button">Подробнее</a>
+        </div>
+        <a th:href="@{/flights(tenantId=${tenantId})}" style="display: block; text-align: center; margin-top: 15px;">Показать все рейсы</a>
     </div>
 
-    <div class="dashboard-section">
+    <div id="bookings" class="dashboard-section">
         <h2>Мои бронирования</h2>
-        <p>Здесь будет отображаться информация о ваших бронированиях.</p>
+        <p>Для просмотра ваших бронирований, пожалуйста, введите ваш ID пользователя:</p>
+
+        <div class="user-id-form">
+            <form th:action="@{/bookings}" method="get">
+                <input type="hidden" name="tenantId" th:value="${tenantId}">
+                <div class="form-group">
+                    <input type="number" name="userId" placeholder="Введите ID пользователя" required>
+                    <button type="submit">Показать бронирования</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 </body>

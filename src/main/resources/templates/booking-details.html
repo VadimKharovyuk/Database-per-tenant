@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бронирование #</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .tenant-badge {
+            background-color: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-right: 15px;
+        }
+        .main-content {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .booking-details {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .info-item {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .info-label {
+            width: 180px;
+            font-weight: bold;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-back {
+            background-color: #6c757d;
+        }
+        .btn-cancel {
+            background-color: #dc3545;
+        }
+        .flight-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .nav-links {
+            margin-bottom: 20px;
+        }
+        .nav-links a {
+            margin-right: 15px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .boarding-pass {
+            background-color: #ffffff;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+            position: relative;
+        }
+        .boarding-pass:before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            right: 30px;
+            width: 20px;
+            height: 20px;
+            background-color: #f4f4f4;
+            border-radius: 50%;
+            border: 2px dashed #ddd;
+        }
+        .boarding-pass:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 30px;
+            width: 20px;
+            height: 20px;
+            background-color: #f4f4f4;
+            border-radius: 50%;
+            border: 2px dashed #ddd;
+        }
+        .boarding-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #007bff;
+        }
+        .boarding-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .boarding-column {
+            flex: 1;
+        }
+        .boarding-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .boarding-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .alert {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1 th:text="'Бронирование #' + ${booking.id}"></h1>
+    <span class="tenant-badge" th:text="${tenantId}"></span>
+</div>
+
+<div class="main-content">
+    <div class="nav-links">
+        <a th:href="@{/dashboard(tenantId=${tenantId})}">Панель управления</a>
+        <a th:href="@{/bookings(tenantId=${tenantId}, userId=${booking.userId})}">Назад к бронированиям</a>
+    </div>
+
+    <div th:if="${param.error}" class="alert alert-danger">
+        <p>Не удалось отменить бронирование. Пожалуйста, попробуйте еще раз.</p>
+    </div>
+
+    <div class="booking-details">
+        <div class="section">
+            <div class="section-title">Информация о бронировании</div>
+            <div class="info-item">
+                <div class="info-label">ID бронирования:</div>
+                <div th:text="${booking.id}"></div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Дата бронирования:</div>
+                <div th:text="${#temporals.format(booking.bookingTime, 'dd.MM.yyyy HH:mm')}"></div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Статус:</div>
+                <div>Подтверждено</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Стоимость:</div>
+                <div th:text="${booking.paidAmount} + ' руб.'"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Информация о пассажире</div>
+            <div class="info-item">
+                <div class="info-label">ФИО пассажира:</div>
+                <div th:text="${booking.passengerName}"></div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Email:</div>
+                <div th:text="${booking.passengerEmail}"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Информация о рейсе</div>
+            <div class="flight-info">
+                <div class="info-item">
+                    <div class="info-label">Номер рейса:</div>
+                    <div th:text="${booking.flightNumber}"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Маршрут:</div>
+                    <div th:text="${booking.departureAirport} + ' → ' + ${booking.arrivalAirport}"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Дата и время вылета:</div>
+                    <div th:text="${#temporals.format(booking.departureTime, 'dd.MM.yyyy HH:mm')}"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Дата и время прибытия:</div>
+                    <div th:text="${#temporals.format(booking.arrivalTime, 'dd.MM.yyyy HH:mm')}"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Номер места:</div>
+                    <div th:text="${booking.seatNumber}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <a th:href="@{/bookings(tenantId=${tenantId}, userId=${booking.userId})}" class="btn btn-back">Назад</a>
+            <form th:action="@{/bookings/{id}/cancel(id=${booking.id})}" method="post" style="display: inline;">
+                <input type="hidden" name="tenantId" th:value="${tenantId}">
+                <button type="submit" class="btn btn-cancel" onclick="return confirm('Вы уверены, что хотите отменить бронирование?')">Отменить бронирование</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="boarding-pass">
+        <div class="boarding-title">Посадочный талон</div>
+
+        <div class="boarding-row">
+            <div class="boarding-column">
+                <div class="boarding-label">Пассажир</div>
+                <div class="boarding-value" th:text="${booking.passengerName}"></div>
+            </div>
+            <div class="boarding-column">
+                <div class="boarding-label">Номер рейса</div>
+                <div class="boarding-value" th:text="${booking.flightNumber}"></div>
+            </div>
+        </div>
+
+        <div class="boarding-row">
+            <div class="boarding-column">
+                <div class="boarding-label">Откуда</div>
+                <div class="boarding-value" th:text="${booking.departureAirport}"></div>
+            </div>
+            <div class="boarding-column">
+                <div class="boarding-label">Куда</div>
+                <div class="boarding-value" th:text="${booking.arrivalAirport}"></div>
+            </div>
+        </div>
+
+        <div class="boarding-row">
+            <div class="boarding-column">
+                <div class="boarding-label">Дата и время вылета</div>
+                <div class="boarding-value" th:text="${#temporals.format(booking.departureTime, 'dd.MM.yyyy HH:mm')}"></div>
+            </div>
+            <div class="boarding-column">
+                <div class="boarding-label">Место</div>
+                <div class="boarding-value" th:text="${booking.seatNumber}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

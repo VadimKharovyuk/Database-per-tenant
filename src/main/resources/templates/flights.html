@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Рейсы</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    .header {
+      background-color: #333;
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      margin: 0;
+    }
+    .tenant-badge {
+      background-color: #007bff;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 12px;
+      margin-right: 15px;
+    }
+    .main-content {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .search-form {
+      background-color: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-row {
+      display: flex;
+      gap: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #f8f9fa;
+    }
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+    .empty-message {
+      text-align: center;
+      padding: 20px;
+      background-color: white;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .book-button {
+      background-color: #28a745;
+    }
+    .book-button:hover {
+      background-color: #218838;
+    }
+    .nav-links {
+      margin-bottom: 20px;
+    }
+    .nav-links a {
+      margin-right: 15px;
+      color: #007bff;
+      text-decoration: none;
+    }
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1>Рейсы</h1>
+  <span class="tenant-badge" th:text="${tenantId}"></span>
+</div>
+
+<div class="main-content">
+  <div class="nav-links">
+    <a th:href="@{/dashboard(tenantId=${tenantId})}">Панель управления</a>
+    <a th:href="@{/flights(tenantId=${tenantId})}">Рейсы</a>
+    <a th:href="@{/}">На главную</a>
+  </div>
+
+  <div class="search-form">
+    <h2>Поиск рейсов</h2>
+    <form th:action="@{/flights/search}" method="get">
+      <input type="hidden" name="tenantId" th:value="${tenantId}">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="departureAirport">Аэропорт вылета:</label>
+          <input type="text" id="departureAirport" name="departureAirport" th:value="${departureAirport}">
+        </div>
+
+        <div class="form-group">
+          <label for="arrivalAirport">Аэропорт прибытия:</label>
+          <input type="text" id="arrivalAirport" name="arrivalAirport" th:value="${arrivalAirport}">
+        </div>
+
+        <div class="form-group">
+          <label for="departureDate">Дата вылета:</label>
+          <input type="date" id="departureDate" name="departureDate" th:value="${departureDate}">
+        </div>
+      </div>
+
+      <button type="submit">Найти рейсы</button>
+    </form>
+  </div>
+
+  <div th:if="${flights != null && !flights.empty}">
+    <h2>Найденные рейсы</h2>
+    <table>
+      <thead>
+      <tr>
+        <th>Номер рейса</th>
+        <th>Откуда</th>
+        <th>Куда</th>
+        <th>Дата и время вылета</th>
+        <th>Дата и время прибытия</th>
+        <th>Свободных мест</th>
+        <th>Цена</th>
+        <th>Действия</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="flight : ${flights}">
+        <td th:text="${flight.flightNumber}"></td>
+        <td th:text="${flight.departureAirport}"></td>
+        <td th:text="${flight.arrivalAirport}"></td>
+        <td th:text="${#temporals.format(flight.departureTime, 'dd.MM.yyyy HH:mm')}"></td>
+        <td th:text="${#temporals.format(flight.arrivalTime, 'dd.MM.yyyy HH:mm')}"></td>
+        <td th:text="${flight.availableSeats}"></td>
+        <td th:text="${flight.basePrice}"></td>
+        <td>
+          <a th:href="@{/flights/{id}(id=${flight.id}, tenantId=${tenantId})}" class="btn book-button">Подробнее</a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div th:if="${flights == null || flights.empty}" class="empty-message">
+    <p>По вашему запросу рейсов не найдено.</p>
+  </div>
+</div>
+</body>
+</html>
