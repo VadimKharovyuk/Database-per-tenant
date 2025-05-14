@@ -1,19 +1,27 @@
 package com.example.databasepertenant.Service;
 
 import com.example.databasepertenant.DataSource.TenantAwareDataSource;
+
+import com.example.databasepertenant.DataSource.TenantContext;
 import com.example.databasepertenant.model.Tenant;
+import com.example.databasepertenant.repository.FlightRepository;
 import com.example.databasepertenant.repository.TenantRepository;
+
 import com.zaxxer.hikari.HikariDataSource;
+import jakarta.persistence.EntityManagerFactory;
 import org.flywaydb.core.Flyway;
-import org.flywaydb.core.api.output.MigrateResult;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -22,13 +30,16 @@ public class TenantService {
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
     private final TenantRepository tenantRepository;
+    private final Map<String, FlightRepository> flightRepositories;
 
     public TenantService(@Qualifier("tenantDataSource") DataSource dataSource,
                          JdbcTemplate jdbcTemplate,
-                         TenantRepository tenantRepository) {
+                         TenantRepository tenantRepository,
+                         Map<String, FlightRepository> flightRepositories) {
         this.dataSource = dataSource;
         this.jdbcTemplate = jdbcTemplate;
         this.tenantRepository = tenantRepository;
+        this.flightRepositories = flightRepositories;
     }
 
     @Transactional
@@ -46,29 +57,30 @@ public class TenantService {
             // Создаем DataSource для новой БД
             HikariDataSource newDataSource = createDataSource(dbName);
 
-            try {
-                // Выполняем миграцию Flyway для новой БД
-                runFlywayMigration(newDataSource);
-                System.out.println("Миграция выполнена успешно для тенанта: " + tenantId);
-
-                // Добавляем DataSource для нового клиента
-                if (dataSource instanceof TenantAwareDataSource) {
-                    ((TenantAwareDataSource) dataSource).addTenant(tenantId, newDataSource);
-                }
-
-                // Сохраняем информацию о тенанте
-                Tenant tenant = new Tenant();
-                tenant.setId(tenantId);
-                tenant.setDbName(dbName);
-                tenant.setDescription(description);
-                tenant.setCreatedAt(LocalDateTime.now());
-
-                return tenantRepository.save(tenant);
-            } catch (Exception e) {
-                System.err.println("Ошибка при миграции или добавлении тенанта: " + e.getMessage());
-                e.printStackTrace();
-                throw e;
+            // Добавляем DataSource для нового клиента
+            if (dataSource instanceof TenantAwareDataSource) {
+                ((TenantAwareDataSource) dataSource).addTenant(tenantId, newDataSource);
             }
+
+            // Выполняем миграцию Flyway
+            runFlywayMigration(newDataSource);
+
+            // Создаем EntityManagerFactory для тенанта
+            EntityManagerFactory emf = createEntityManagerFactory(newDataSource, tenantId);
+
+            // Создаем и регистрируем FlightRepository для тенанта
+            FlightRepository flightRepository = new FlightRepositoryImpl(emf);
+            flightRepositories.put(tenantId, flightRepository);
+            System.out.println("Зарегистрирован репозиторий для тенанта: " + tenantId);
+
+            // Сохраняем информацию о тенанте
+            Tenant tenant = new Tenant();
+            tenant.setId(tenantId);
+            tenant.setDbName(dbName);
+            tenant.setDescription(description);
+            tenant.setCreatedAt(LocalDateTime.now());
+
+            return tenantRepository.save(tenant);
         } catch (Exception e) {
             // В случае ошибки, можно попытаться удалить созданную БД
             try {
@@ -85,27 +97,45 @@ public class TenantService {
         ds.setJdbcUrl("jdbc:postgresql://localhost:5432/" + dbName);
         ds.setUsername("postgres");
         ds.setPassword("password");
-        ds.setMaximumPoolSize(5); // Ограничиваем размер пула соединений
         return ds;
     }
 
     private void runFlywayMigration(DataSource ds) {
         try {
-            // Настраиваем Flyway с явным указанием пути миграции
             Flyway flyway = Flyway.configure()
                     .dataSource(ds)
-                    .locations("classpath:db/migration") // Правильное расположение миграций для тенантов
-                    .baselineOnMigrate(true) // Важно для первой миграции
+                    .locations("classpath:db/migration")
+                    .baselineOnMigrate(true)
                     .load();
 
-            // Запускаем миграцию и выводим информацию
-            MigrateResult migrationsApplied = flyway.migrate();
-            System.out.println("Применено " + migrationsApplied + " миграций");
+            Object result = flyway.migrate();
+            System.out.println("Применено " + result + " миграций");
         } catch (Exception e) {
             System.err.println("Ошибка при выполнении Flyway миграции: " + e.getMessage());
-            e.printStackTrace();
-            throw e; // Пробрасываем исключение дальше
+            throw e;
         }
+    }
+
+    // Метод для создания EntityManagerFactory
+    private EntityManagerFactory createEntityManagerFactory(DataSource ds, String tenantId) {
+        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+        em.setDataSource(ds);
+        em.setPackagesToScan("com.example.databasepertenant.model");
+
+        // Устанавливаем текущего тенанта
+        TenantContext.setCurrentTenant(tenantId);
+
+        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        em.setJpaVendorAdapter(vendorAdapter);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("hibernate.hbm2ddl.auto", "none");
+        properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+        em.setJpaPropertyMap(properties);
+
+        em.afterPropertiesSet();
+
+        return em.getObject();
     }
 
     public List<Tenant> getAllTenants() {
@@ -114,39 +144,6 @@ public class TenantService {
 
     public Optional<Tenant> getTenantById(String id) {
         return tenantRepository.findById(id);
-    }
-
-    /**
-     * Инициализировать существующие тенанты заново
-     * (выполнить миграцию для существующих БД)
-     */
-    public void reinitializeExistingTenants() {
-        List<Tenant> tenants = tenantRepository.findAll();
-
-        for (Tenant tenant : tenants) {
-            try {
-                String dbName = tenant.getDbName();
-                String tenantId = tenant.getId();
-
-                System.out.println("Переинициализация тенанта: " + tenantId + " с БД: " + dbName);
-
-                // Создаем DataSource для существующей БД
-                HikariDataSource dataSource = createDataSource(dbName);
-
-                // Выполняем миграцию
-                runFlywayMigration(dataSource);
-
-                // Обновляем DataSource в TenantAwareDataSource
-                if (this.dataSource instanceof TenantAwareDataSource) {
-                    ((TenantAwareDataSource) this.dataSource).addTenant(tenantId, dataSource);
-                }
-
-                System.out.println("Тенант " + tenantId + " успешно переинициализирован");
-            } catch (Exception e) {
-                System.err.println("Ошибка при переинициализации тенанта " + tenant.getId() + ": " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
     }
 
     /**
@@ -169,6 +166,47 @@ public class TenantService {
         } catch (Exception e) {
             System.err.println("Ошибка при инициализации базы данных администратора: " + e.getMessage());
             e.printStackTrace();
+            throw e;
+        }
+    }
+
+    /**
+     * Инициализировать существующие тенанты заново
+     * (выполнить миграцию для существующих БД и создать репозитории)
+     */
+    public void reinitializeExistingTenants() {
+        List<Tenant> tenants = tenantRepository.findAll();
+
+        for (Tenant tenant : tenants) {
+            try {
+                String dbName = tenant.getDbName();
+                String tenantId = tenant.getId();
+
+                System.out.println("Переинициализация тенанта: " + tenantId + " с БД: " + dbName);
+
+                // Создаем DataSource для существующей БД
+                HikariDataSource tenantDataSource = createDataSource(dbName);
+
+                // Выполняем миграцию
+                runFlywayMigration(tenantDataSource);
+
+                // Обновляем DataSource в TenantAwareDataSource
+                if (this.dataSource instanceof TenantAwareDataSource) {
+                    ((TenantAwareDataSource) this.dataSource).addTenant(tenantId, tenantDataSource);
+                }
+
+                // Создаем EntityManagerFactory для тенанта
+                EntityManagerFactory emf = createEntityManagerFactory(tenantDataSource, tenantId);
+
+                // Создаем и регистрируем FlightRepository для тенанта
+                FlightRepository flightRepository = new FlightRepositoryImpl(emf);
+                flightRepositories.put(tenantId, flightRepository);
+
+                System.out.println("Тенант " + tenantId + " успешно переинициализирован");
+            } catch (Exception e) {
+                System.err.println("Ошибка при переинициализации тенанта " + tenant.getId() + ": " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 }

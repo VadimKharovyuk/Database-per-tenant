@@ -1,8 +1,5 @@
 package com.example.databasepertenant.DataSource;
 
-/**
- * Контекст для хранения идентификатора текущего тенанта в ThreadLocal
- */
 public class TenantContext {
     private static final ThreadLocal<String> CURRENT_TENANT = new ThreadLocal<>();
 

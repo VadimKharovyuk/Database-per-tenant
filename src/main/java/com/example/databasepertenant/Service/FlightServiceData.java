@@ -1,18 +1,19 @@
 package com.example.databasepertenant.Service;
+
 import com.example.databasepertenant.DataSource.TenantContext;
 import com.example.databasepertenant.dto.FlightDTO;
 import com.example.databasepertenant.maper.FlightMapper;
 import com.example.databasepertenant.model.Flight;
-import com.example.databasepertenant.model.Tenant;
 import com.example.databasepertenant.repository.FlightRepository;
-import com.example.databasepertenant.repository.TenantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +21,6 @@ import java.util.stream.Collectors;
 public class FlightServiceData {
     private final Map<String, FlightRepository> flightRepositories;
     private final FlightMapper flightMapper;
-    private final TenantRepository tenantRepository;
 
     /**
      * Получить все рейсы из всех баз данных компаний
@@ -36,8 +36,7 @@ public class FlightServiceData {
 
             try {
                 List<Flight> flights = entry.getValue().findAll();
-                List<FlightDTO> companyFlights = flightMapper.toDtoList(flights, companyId);
-                allFlights.addAll(companyFlights);
+                allFlights.addAll(flightMapper.toDtoList(flights, companyId));
             } finally {
                 // Очищаем контекст тенанта после выполнения
                 TenantContext.clear();
@@ -47,6 +46,9 @@ public class FlightServiceData {
         return allFlights;
     }
 
+    /**
+     * Получить рейсы конкретной авиакомпании
+     */
     public List<FlightDTO> getCompanyFlights(String companyId) {
         FlightRepository repository = flightRepositories.get(companyId);
         if (repository == null) {
@@ -64,11 +66,16 @@ public class FlightServiceData {
             TenantContext.clear();
         }
     }
-    
+
     /**
-     * Найти рейсы по параметрам поиска
+     * Поиск рейсов по параметрам
      */
-    public List<FlightDTO> searchFlights(String origin, String destination, LocalDateTime departureDate) {
+    public List<FlightDTO> searchFlights(
+            String origin,
+            String destination,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    ) {
         List<FlightDTO> matchingFlights = new ArrayList<>();
 
         for (Map.Entry<String, FlightRepository> entry : flightRepositories.entrySet()) {
@@ -78,30 +85,16 @@ public class FlightServiceData {
             TenantContext.setCurrentTenant(companyId);
 
             try {
-                // Предполагается, что вы добавите метод поиска в репозиторий
-                // Здесь для примера используем фильтрацию в памяти
-                List<Flight> flights = repository.findAll();
+                List<Flight> flights = repository.findByOriginAndDestinationAndDepartureTimeBetween(
+                        origin, destination, startDate, endDate);
 
-                List<FlightDTO> companyMatches = flights.stream()
-                        .filter(flight -> flight.getOrigin().equals(origin))
-                        .filter(flight -> flight.getDestination().equals(destination))
-                        .filter(flight -> isSameDay(flight.getDepartureTime(), departureDate))
-                        .map(flight -> flightMapper.toDto(flight, companyId))
-                        .collect(Collectors.toList());
-
-                matchingFlights.addAll(companyMatches);
+                matchingFlights.addAll(flightMapper.toDtoList(flights, companyId));
             } finally {
                 TenantContext.clear();
             }
         }
 
         return matchingFlights;
-    }
-
-    private boolean isSameDay(LocalDateTime time1, LocalDateTime time2) {
-        return time1.getYear() == time2.getYear() &&
-                time1.getMonth() == time2.getMonth() &&
-                time1.getDayOfMonth() == time2.getDayOfMonth();
     }
 
     /**
@@ -138,6 +131,59 @@ public class FlightServiceData {
             Flight flight = flightMapper.toEntity(flightDTO);
             Flight savedFlight = repository.save(flight);
             return flightMapper.toDto(savedFlight, companyId);
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
+    /**
+     * Обновить информацию о рейсе
+     */
+    public FlightDTO updateFlight(FlightDTO flightDTO, String companyId) {
+        FlightRepository repository = flightRepositories.get(companyId);
+        if (repository == null) {
+            throw new RuntimeException("Компания не найдена: " + companyId);
+        }
+
+        if (flightDTO.getId() == null) {
+            throw new IllegalArgumentException("Flight ID cannot be null for update operation");
+        }
+
+        TenantContext.setCurrentTenant(companyId);
+
+        try {
+            // Проверяем, существует ли рейс
+            if (!repository.existsById(flightDTO.getId())) {
+                return null; // Рейс не найден
+            }
+
+            Flight flight = flightMapper.toEntity(flightDTO);
+            Flight updatedFlight = repository.save(flight);
+            return flightMapper.toDto(updatedFlight, companyId);
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
+    /**
+     * Удалить рейс
+     */
+    public boolean deleteFlight(Long flightId, String companyId) {
+        FlightRepository repository = flightRepositories.get(companyId);
+        if (repository == null) {
+            throw new RuntimeException("Компания не найдена: " + companyId);
+        }
+
+        TenantContext.setCurrentTenant(companyId);
+
+        try {
+            // Проверяем, существует ли рейс
+            if (!repository.existsById(flightId)) {
+                return false; // Рейс не найден
+            }
+
+            repository.deleteById(flightId);
+            return true;
         } finally {
             TenantContext.clear();
         }
