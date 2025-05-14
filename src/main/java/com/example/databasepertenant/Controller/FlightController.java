@@ -25,9 +25,6 @@ public class FlightController {
     /**
      * Получить все рейсы из всех авиакомпаний
      */
-    /**
-     * Получить все рейсы из всех авиакомпаний
-     */
     @GetMapping
     public ResponseEntity<?> getAllFlights() {
         try {
@@ -131,9 +128,6 @@ public class FlightController {
         }
     }
 
-    /**
-     * Добавить новый рейс
-     */
     /**
      * Добавить новый рейс
      */

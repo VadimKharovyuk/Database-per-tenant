@@ -69,4 +69,21 @@ public class TenantController {
             ));
         }
     }
+
+    @PostMapping("/reinitialize")
+    public ResponseEntity<?> reinitializeExistingTenants() {
+        try {
+            tenantService.reinitializeExistingTenants();
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "All companies successfully reinitialized"
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Error reinitializing companies: " + e.getMessage()
+            ));
+        }
+    }
 }
