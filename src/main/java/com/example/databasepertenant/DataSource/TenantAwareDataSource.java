@@ -1,6 +1,5 @@
 package com.example.databasepertenant.DataSource;
 
-import com.example.databasepertenant.config.TenantContext;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import javax.sql.DataSource;
 import java.util.HashMap;

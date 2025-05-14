@@ -1,6 +1,5 @@
-package com.example.databasepertenant.config;
+package com.example.databasepertenant.DataSource;
 
-import com.example.databasepertenant.DataSource.TenantAwareDataSource;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

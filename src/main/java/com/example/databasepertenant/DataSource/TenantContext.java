@@ -1,4 +1,4 @@
-package com.example.databasepertenant.config;
+package com.example.databasepertenant.DataSource;
 
 /**
  * Контекст для хранения идентификатора текущего тенанта в ThreadLocal

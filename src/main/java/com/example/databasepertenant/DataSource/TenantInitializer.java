@@ -1,6 +1,5 @@
-package com.example.databasepertenant.config;
+package com.example.databasepertenant.DataSource;
 
-import com.example.databasepertenant.DataSource.TenantAwareDataSource;
 import com.example.databasepertenant.model.Tenant;
 import com.example.databasepertenant.repository.TenantRepository;
 import com.zaxxer.hikari.HikariDataSource;

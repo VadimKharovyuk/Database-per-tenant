@@ -1,6 +1,6 @@
 package com.example.databasepertenant.Service;
 
-import com.example.databasepertenant.config.TenantContext;
+import com.example.databasepertenant.DataSource.TenantContext;
 import com.example.databasepertenant.model.Role;
 import com.example.databasepertenant.model.User;
 import com.example.databasepertenant.repository.UserRepository;

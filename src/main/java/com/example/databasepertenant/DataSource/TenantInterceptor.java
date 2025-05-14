@@ -1,6 +1,5 @@
 package com.example.databasepertenant.DataSource;
 
-import com.example.databasepertenant.config.TenantContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;

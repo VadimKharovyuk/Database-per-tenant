@@ -1,8 +1,7 @@
-package com.example.databasepertenant.config;
+package com.example.databasepertenant.DataSource;
 
 import com.example.databasepertenant.Service.FlightRepositoryImpl;
 import com.example.databasepertenant.repository.FlightRepository;
-import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

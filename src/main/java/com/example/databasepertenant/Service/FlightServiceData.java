@@ -1,6 +1,6 @@
 package com.example.databasepertenant.Service;
 
-import com.example.databasepertenant.config.TenantContext;
+import com.example.databasepertenant.DataSource.TenantContext;
 import com.example.databasepertenant.dto.FlightDTO;
 import com.example.databasepertenant.maper.FlightMapper;
 import com.example.databasepertenant.repository.FlightRepository;
