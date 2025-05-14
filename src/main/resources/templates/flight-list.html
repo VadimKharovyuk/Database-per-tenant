@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Все рейсы</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+<h1>Все рейсы</h1>
+
+<table>
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Номер рейса</th>
+    <th>Откуда</th>
+    <th>Куда</th>
+    <th>Дата вылета</th>
+    <th>Авиакомпания</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="flight : ${flights}">
+    <td th:text="${flight.id}"></td>
+    <td th:text="${flight.flightNumber}"></td>
+    <td th:text="${flight.departureCity}"></td>
+    <td th:text="${flight.arrivalCity}"></td>
+    <td th:text="${flight.departureDate}"></td>
+    <td th:text="${flight.companyName}"></td>
+  </tr>
+  </tbody>
+</table>
+
+<div>
+  <h3>Список авиакомпаний:</h3>
+  <ul>
+    <li th:each="company : ${flights.![companyName].distinct()}">
+      <a th:href="@{'/flights/company/' + ${company}}" th:text="${company}"></a>
+    </li>
+  </ul>
+</div>
+</body>
+</html>

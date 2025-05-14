@@ -1,5 +1,6 @@
 package com.example.databasepertenant.DataSource;
 
+import com.example.databasepertenant.config.TenantContext;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -28,14 +29,9 @@ public class TenantAwareDataSource extends AbstractRoutingDataSource {
     }
 
     public void addTenant(String tenantId, DataSource dataSource) {
-        // Добавляем в нашу карту
         tenantDataSources.put(tenantId, dataSource);
-
-        // Обновляем карту источников данных в родительском классе
-        super.setTargetDataSources(new HashMap<>(tenantDataSources));
-
-        // Переинициализируем
-        super.afterPropertiesSet();
+        setTargetDataSources(new HashMap<>(tenantDataSources));
+        afterPropertiesSet(); // Важно вызвать это для обновления решающего DataSource
     }
 
     public void removeTenant(String tenantId) {

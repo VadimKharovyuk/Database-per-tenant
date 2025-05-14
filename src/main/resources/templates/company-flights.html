@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="'Рейсы компании ' + ${companyId}"></title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+<h1 th:text="'Рейсы компании ' + ${companyId}"></h1>
+
+<table>
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Номер рейса</th>
+    <th>Откуда</th>
+    <th>Куда</th>
+    <th>Дата вылета</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="flight : ${flights}">
+    <td th:text="${flight.id}"></td>
+    <td th:text="${flight.flightNumber}"></td>
+    <td th:text="${flight.departureCity}"></td>
+    <td th:text="${flight.arrivalCity}"></td>
+    <td th:text="${flight.departureDate}"></td>
+  </tr>
+  </tbody>
+</table>
+
+<p>
+  <a href="/flights">Вернуться к списку всех рейсов</a>
+</p>
+</body>
+</html>

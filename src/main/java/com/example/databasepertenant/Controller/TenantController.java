@@ -17,6 +17,13 @@ public class TenantController {
 
     private final TenantService tenantService;
 
+
+
+    @GetMapping
+    public ResponseEntity<List<Tenant>> getAllTenants() {
+        return ResponseEntity.ok(tenantService.getAllTenants());
+    }
+
     @PostMapping
     public ResponseEntity<?> createTenant(@RequestBody TenantDTO tenantDTO) {
         try {
@@ -38,11 +45,6 @@ public class TenantController {
         }
     }
 
-
-    @GetMapping
-    public ResponseEntity<List<Tenant>> getAllTenants() {
-        return ResponseEntity.ok(tenantService.getAllTenants());
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getTenantById(@PathVariable String id) {

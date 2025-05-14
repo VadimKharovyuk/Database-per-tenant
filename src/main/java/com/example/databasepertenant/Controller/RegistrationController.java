@@ -1,7 +1,6 @@
 package com.example.databasepertenant.Controller;
-
-import com.example.databasepertenant.DataSource.TenantContext;
 import com.example.databasepertenant.Service.RegistrationService;
+import com.example.databasepertenant.config.TenantContext;
 import com.example.databasepertenant.dto.CreateUserDTO;
 import com.example.databasepertenant.dto.UserResponseDTO;
 import lombok.RequiredArgsConstructor;

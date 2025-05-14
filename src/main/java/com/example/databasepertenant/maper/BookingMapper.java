@@ -9,6 +9,7 @@ import com.example.databasepertenant.model.Flight;
 import com.example.databasepertenant.model.User;
 import com.example.databasepertenant.repository.FlightRepository;
 import com.example.databasepertenant.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -19,7 +20,7 @@ public class BookingMapper {
     private final UserRepository userRepository;
     private final FlightRepository flightRepository;
 
-    public BookingMapper(UserRepository userRepository, FlightRepository flightRepository) {
+    public BookingMapper(UserRepository userRepository, @Qualifier("company1Repository") FlightRepository flightRepository) {
         this.userRepository = userRepository;
         this.flightRepository = flightRepository;
     }
