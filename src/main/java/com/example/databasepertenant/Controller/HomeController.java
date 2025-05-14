@@ -24,7 +24,6 @@ public class HomeController {
         List<Tenant> tenants = tenantService.getAllTenants();
         model.addAttribute("tenants", tenants);
 
-
         return "home";
     }
 }

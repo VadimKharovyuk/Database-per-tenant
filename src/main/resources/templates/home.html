@@ -144,25 +144,11 @@
   <p>Выберите авиакомпанию для входа или регистрации в системе.</p>
 
   <div class="tenant-cards">
-    <div class="tenant-card">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Turkish_Airlines_logo_2019.svg" alt="Turkish Airlines">
-      <h4>Turkish Airlines</h4>
-      <p>Флагманская авиакомпания Турции, крупнейший авиаперевозчик страны</p>
-      <a href="/login?tenantId=turkish_airlines" class="btn">Выбрать</a>
-    </div>
-
-    <div class="tenant-card">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/7/70/Pegasus_Airlines_logo.svg" alt="Pegasus Airlines">
-      <h4>Pegasus Airlines</h4>
-      <p>Pegasus Airlines - международная авиакомпания, бюджетный перевозчик Турции</p>
-      <a href="/login?tenantId=pegasus_airlines" class="btn">Выбрать</a>
-    </div>
-
-    <div class="tenant-card">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/3/3d/SunExpress_logo.svg" alt="SunExpress">
-      <h4>SunExpress</h4>
-      <p>Совместное предприятие Turkish Airlines и Lufthansa, специализируется на туристических направлениях</p>
-      <a href="/login?tenantId=sunexpress" class="btn">Выбрать</a>
+    <div th:each="tenant : ${tenants}" class="tenant-card">
+      <img th:src="${tenant.getDbName()}" th:alt="${tenant.getDbName()}">
+      <h4 th:text="${tenant.description}">Название авиакомпании</h4>
+      <p th:text="${tenant.description}">Описание авиакомпании</p>
+      <a th:href="@{/flights/company/{companyId}(companyId=${tenant.id})}" class="btn">Посмотреть рейсы</a>
     </div>
   </div>
 </div>

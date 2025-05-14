@@ -24,22 +24,6 @@ public class FlightViewController {
     private final TenantService tenantService;
 
     /**
-     * Просмотр всех рейсов из всех авиакомпаний
-     */
-    @GetMapping
-    public String getAllFlights(Model model) {
-        try {
-            List<FlightDTO> flights = flightServiceData.getAllFlights();
-            model.addAttribute("flights", flights);
-            model.addAttribute("title", "All Flights");
-            return "flights/list";
-        } catch (Exception e) {
-            model.addAttribute("error", "Error retrieving flights: " + e.getMessage());
-            return "error";
-        }
-    }
-
-    /**
      * Просмотр рейсов конкретной авиакомпании
      */
     @GetMapping("/company/{companyId}")
@@ -60,6 +44,24 @@ public class FlightViewController {
             return "error";
         }
     }
+
+    /**
+     * Просмотр всех рейсов из всех авиакомпаний
+     */
+    @GetMapping
+    public String getAllFlights(Model model) {
+        try {
+            List<FlightDTO> flights = flightServiceData.getAllFlights();
+            model.addAttribute("flights", flights);
+            model.addAttribute("title", "All Flights");
+            return "flights/list";
+        } catch (Exception e) {
+            model.addAttribute("error", "Error retrieving flights: " + e.getMessage());
+            return "error";
+        }
+    }
+
+
 
     /**
      * Страница поиска рейсов
