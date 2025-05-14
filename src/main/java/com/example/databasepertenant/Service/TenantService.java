@@ -9,6 +9,7 @@ import com.example.databasepertenant.repository.TenantRepository;
 
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
+import lombok.Getter;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,13 +24,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 @Service
 public class TenantService {
 
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
     private final TenantRepository tenantRepository;
+    @Getter
     private final Map<String, FlightRepository> flightRepositories;
 
     public TenantService(@Qualifier("tenantDataSource") DataSource dataSource,
@@ -241,7 +242,4 @@ public class TenantService {
         }
     }
 
-    public Map<String, FlightRepository> getFlightRepositories() {
-        return flightRepositories;
-    }
 }

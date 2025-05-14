@@ -10,4 +10,7 @@ public class DatabasePerTenantApplication {
         SpringApplication.run(DatabasePerTenantApplication.class, args);
     }
 
+
+    ///initializeTenant  не работает метод при апустуе пиходится в ручную
+
 }

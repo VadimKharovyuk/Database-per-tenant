@@ -29,7 +29,6 @@ import static jakarta.persistence.Persistence.createEntityManagerFactory;
 public class FlightServiceData {
     private final Map<String, FlightRepository> flightRepositories;
     private final FlightMapper flightMapper;
-    private final TenantService tenantService;
 
     /**
      * Получить все рейсы из всех баз данных компаний

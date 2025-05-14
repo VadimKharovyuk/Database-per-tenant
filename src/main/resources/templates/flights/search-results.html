@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .company-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background-color: #eaeaea;
+            border-radius: 12px;
+            font-size: 0.9em;
+        }
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #0066cc;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #0052a3;
+            text-decoration: none;
+        }
+        .search-info {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Search Results</h1>
+    <div>
+        <a href="/flights" class="btn">All Flights</a>
+        <a href="/flights/search" class="btn">New Search</a>
+        <a href="/flights/add" class="btn">Add Flight</a>
+    </div>
+</div>
+
+<div class="search-info">
+    <p>
+        <strong>Origin:</strong> <span th:text="${origin}">Istanbul</span> |
+        <strong>Destination:</strong> <span th:text="${destination}">Moscow</span> |
+        <strong>Date:</strong> <span th:text="${#temporals.format(departureDate, 'yyyy-MM-dd')}">2025-06-01</span>
+    </p>
+    <p>
+        <strong>Results:</strong> <span th:text="${flights.size()}">5</span> flights found
+    </p>
+</div>
+
+<table th:if="${not #lists.isEmpty(flights)}">
+    <thead>
+    <tr>
+        <th>Flight No.</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Departure</th>
+        <th>Arrival</th>
+        <th>Price</th>
+        <th>Available Seats</th>
+        <th>Aircraft</th>
+        <th>Company</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="flight : ${flights}">
+        <td th:text="${flight.flightNumber}">FL001</td>
+        <td th:text="${flight.origin}">Istanbul</td>
+        <td th:text="${flight.destination}">Moscow</td>
+        <td th:text="${#temporals.format(flight.departureTime, 'yyyy-MM-dd HH:mm')}">2025-06-01 08:30</td>
+        <td th:text="${#temporals.format(flight.arrivalTime, 'yyyy-MM-dd HH:mm')}">2025-06-01 11:45</td>
+        <td th:text="${flight.price}">285.00</td>
+        <td th:text="${flight.availableSeats}">180</td>
+        <td th:text="${flight.aircraft}">Airbus A330-300</td>
+        <td>
+            <span class="company-badge" th:text="${flight.companyName}">Turkish Airlines</span>
+        </td>
+        <td>
+            <a th:href="@{'/flights/' + ${flight.companyId} + '/' + ${flight.id}}">Details</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div th:if="${#lists.isEmpty(flights)}">
+    <p>No flights found matching your search criteria.</p>
+</div>
+</body>
+</html>

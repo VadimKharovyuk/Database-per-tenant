@@ -43,6 +43,7 @@ public class SecurityConfig {
                                 "/api/**",
                                 "/api/flights/**",
                                 "/login/**",
+                                "/flights/**",
                                 "/register/**",
                                 "/flights/**"
                                 ,"/")

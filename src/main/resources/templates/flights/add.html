@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add New Flight</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"], input[type="datetime-local"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0052a3;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #0066cc;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #0052a3;
+            text-decoration: none;
+        }
+        .error {
+            color: red;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Add New Flight</h1>
+    <div>
+        <a href="/flights" class="btn">All Flights</a>
+        <a href="/flights/search" class="btn">Search Flights</a>
+    </div>
+</div>
+
+<div class="form-container">
+    <div th:if="${error}" class="error" th:text="${error}">Error message</div>
+
+    <form action="/flights/add" method="post" th:object="${flight}">
+        <div class="form-group">
+            <label for="tenantId">Airline:</label>
+            <select id="tenantId" name="tenantId" required>
+                <option value="">-- Select Airline --</option>
+                <option th:each="company : ${companies}"
+                        th:value="${company.id}"
+                        th:text="${company.description}">Turkish Airlines</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="flightNumber">Flight Number:</label>
+            <input type="text" id="flightNumber" name="flightNumber" th:field="*{flightNumber}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="origin">Origin City:</label>
+            <input type="text" id="origin" name="origin" th:field="*{origin}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="destination">Destination City:</label>
+            <input type="text" id="destination" name="destination" th:field="*{destination}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="departureTime">Departure Time:</label>
+            <input type="datetime-local" id="departureTime" name="departureTime" th:field="*{departureTime}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="arrivalTime">Arrival Time:</label>
+            <input type="datetime-local" id="arrivalTime" name="arrivalTime" th:field="*{arrivalTime}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="price">Price:</label>
+            <input type="number" id="price" name="price" th:field="*{price}" step="0.01" min="0" required>
+        </div>
+
+        <div class="form-group">
+            <label for="availableSeats">Available Seats:</label>
+            <input type="number" id="availableSeats" name="availableSeats" th:field="*{availableSeats}" min="1" required>
+        </div>
+
+        <div class="form-group">
+            <label for="aircraft">Aircraft:</label>
+            <input type="text" id="aircraft" name="aircraft" th:field="*{aircraft}" required>
+        </div>
+
+        <button type="submit">Add Flight</button>
+    </form>
+</div>
+</body>
+</html>

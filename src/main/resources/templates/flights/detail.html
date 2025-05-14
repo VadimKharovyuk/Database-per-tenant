@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Flight Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .flight-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+            max-width: 800px;
+        }
+        .flight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .flight-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .company-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #eaeaea;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+        .flight-route {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .city {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .arrow {
+            margin: 0 20px;
+            font-size: 20px;
+        }
+        .flight-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .detail-item {
+            margin-bottom: 10px;
+        }
+        .label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #0066cc;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #0052a3;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Flight Details</h1>
+    <div>
+        <a href="/flights" class="btn">All Flights</a>
+        <a href="/flights/search" class="btn">Search Flights</a>
+        <a href="/flights/add" class="btn">Add Flight</a>
+    </div>
+</div>
+
+<div class="flight-card" th:if="${flight != null}">
+    <div class="flight-header">
+        <div class="flight-number" th:text="${flight.flightNumber}">TK414</div>
+        <div class="company-badge" th:text="${flight.companyName}">Turkish Airlines</div>
+    </div>
+
+    <div class="flight-route">
+        <div class="city" th:text="${flight.origin}">Istanbul</div>
+        <div class="arrow">→</div>
+        <div class="city" th:text="${flight.destination}">Moscow</div>
+    </div>
+
+    <div class="flight-details">
+        <div class="detail-item">
+            <span class="label">Departure:</span>
+            <span th:text="${#temporals.format(flight.departureTime, 'yyyy-MM-dd HH:mm')}">2025-06-01 08:30</span>
+        </div>
+
+        <div class="detail-item">
+            <span class="label">Arrival:</span>
+            <span th:text="${#temporals.format(flight.arrivalTime, 'yyyy-MM-dd HH:mm')}">2025-06-01 11:45</span>
+        </div>
+
+<!--        <div class="detail-item">-->
+<!--            <span class="label">Duration:</span>-->
+<!--            <span th:text="${#temporals.format(java.time.Duration.ofSeconds(java.time.temporal.ChronoUnit.SECONDS.between(flight.departureTime, flight.arrivalTime)), 'HH:mm')}">03:15</span>-->
+<!--        </div>-->
+
+        <div class="detail-item">
+            <span class="label">Aircraft:</span>
+            <span th:text="${flight.aircraft}">Airbus A330-300</span>
+        </div>
+
+        <div class="detail-item">
+            <span class="label">Price:</span>
+            <span th:text="${flight.price}">285.00</span>
+        </div>
+
+        <div class="detail-item">
+            <span class="label">Available Seats:</span>
+            <span th:text="${flight.availableSeats}">180</span>
+        </div>
+    </div>
+</div>
+</body>
+</html>
