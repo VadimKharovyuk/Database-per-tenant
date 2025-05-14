@@ -16,46 +16,31 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Flight {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "flight_number")
     private String flightNumber;
 
-    @Column(nullable = false)
-    private String departureAirport;
+    @Column(name = "origin")
+    private String origin;
 
-    @Column(nullable = false)
-    private String arrivalAirport;
+    @Column(name = "destination")
+    private String destination;
 
-    @Column(nullable = false)
-    private LocalDateTime  departureTime;
+    @Column(name = "departure_time")
+    private LocalDateTime departureTime;
 
-    @Column(nullable = false)
+    @Column(name = "arrival_time")
     private LocalDateTime arrivalTime;
 
-    @Column(nullable = false)
+    @Column(name = "price")
+    private BigDecimal price;
+
+    @Column(name = "available_seats")
     private Integer availableSeats;
 
-    @Column(nullable = false)
-    private BigDecimal basePrice;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    @Column(name = "aircraft")
+    private String aircraft;
 }

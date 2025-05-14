@@ -28,39 +28,33 @@ CREATE TABLE user_roles (
 );
 
 -- Таблица услуг компании
--- Таблица рейсов
-CREATE TABLE flights (
-                         id SERIAL PRIMARY KEY,
-                         flight_number VARCHAR(20) NOT NULL,
-                         departure_airport VARCHAR(100) NOT NULL,
-                         arrival_airport VARCHAR(100) NOT NULL,
-                         departure_time TIMESTAMP NOT NULL,
-                         arrival_time TIMESTAMP NOT NULL,
-                         available_seats INTEGER NOT NULL,
-                         base_price DECIMAL(10, 2) NOT NULL,
-                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- Create flights table for tenant databases
+CREATE TABLE IF NOT EXISTS flights (
+                                       id SERIAL PRIMARY KEY,
+                                       flight_number VARCHAR(20) NOT NULL,
+                                       origin VARCHAR(100) NOT NULL,
+                                       destination VARCHAR(100) NOT NULL,
+                                       departure_time TIMESTAMP NOT NULL,
+                                       arrival_time TIMESTAMP NOT NULL,
+                                       price DECIMAL(10, 2) NOT NULL,
+                                       available_seats INTEGER NOT NULL,
+                                       aircraft VARCHAR(50) NOT NULL
 );
 
--- Таблица бронирований
-CREATE TABLE bookings (
-                          id SERIAL PRIMARY KEY,
-                          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                          flight_id INTEGER REFERENCES flights(id) ON DELETE CASCADE,
-                          passenger_name VARCHAR(100) NOT NULL,
-                          passenger_email VARCHAR(100) NOT NULL,
-                          seat_number VARCHAR(10) NOT NULL,
-                          paid_amount DECIMAL(10, 2) NOT NULL,
-                          booking_time TIMESTAMP NOT NULL,
-                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- Add index for common search queries
+CREATE INDEX IF NOT EXISTS idx_flights_origin_destination ON flights(origin, destination);
+CREATE INDEX IF NOT EXISTS idx_flights_departure_time ON flights(departure_time);
+CREATE INDEX IF NOT EXISTS idx_flights_flight_number ON flights(flight_number);
 
--- Индексы для быстрого поиска
-CREATE INDEX idx_flights_departure ON flights(departure_time);
-CREATE INDEX idx_flights_airports ON flights(departure_airport, arrival_airport);
-CREATE INDEX idx_bookings_user ON bookings(user_id);
-CREATE INDEX idx_bookings_flight ON bookings(flight_id);
+-- Optional: Add some sample data for testing
+INSERT INTO flights (flight_number, origin, destination, departure_time, arrival_time, price, available_seats, aircraft)
+VALUES ('FL001', 'Moscow', 'London', '2025-06-01 08:00:00', '2025-06-01 10:30:00', 250.00, 120, 'Boeing 737');
+
+INSERT INTO flights (flight_number, origin, destination, departure_time, arrival_time, price, available_seats, aircraft)
+VALUES ('FL002', 'London', 'New York', '2025-06-01 12:00:00', '2025-06-01 20:00:00', 450.00, 200, 'Boeing 777');
+
+INSERT INTO flights (flight_number, origin, destination, departure_time, arrival_time, price, available_seats, aircraft)
+VALUES ('FL003', 'Moscow', 'Paris', '2025-06-02 09:00:00', '2025-06-02 11:30:00', 180.00, 150, 'Airbus A320');
 
 -- Создание индексов для быстрого поиска
 CREATE INDEX idx_users_email ON users(email);

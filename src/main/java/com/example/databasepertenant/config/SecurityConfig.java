@@ -41,6 +41,7 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/debug/**",
                                 "/api/**",
+                                "/api/flights/**",
                                 "/login/**",
                                 "/register/**",
                                 "/flights/**"

@@ -19,6 +19,7 @@ public class TenantController {
 
 
 
+
     @GetMapping
     public ResponseEntity<List<Tenant>> getAllTenants() {
         return ResponseEntity.ok(tenantService.getAllTenants());
@@ -51,5 +52,21 @@ public class TenantController {
         return tenantService.getTenantById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+
+    @PostMapping("/init-admin")
+    public ResponseEntity<?> initializeAdminDb() {
+        try {
+            tenantService.initializeAdminDatabase();
+            return ResponseEntity.ok(Map.of(
+                    "message", "База данных администратора успешно инициализирована"
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", "Ошибка при инициализации базы данных: " + e.getMessage()
+            ));
+        }
     }
 }

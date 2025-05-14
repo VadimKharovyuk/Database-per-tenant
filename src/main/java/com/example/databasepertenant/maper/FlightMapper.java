@@ -1,18 +1,26 @@
 package com.example.databasepertenant.maper;
 
-import com.example.databasepertenant.dto.CreateFlightDTO;
 import com.example.databasepertenant.dto.FlightDTO;
-import com.example.databasepertenant.dto.UpdateFlightDTO;
 import com.example.databasepertenant.model.Flight;
+import com.example.databasepertenant.repository.TenantRepository;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class FlightMapper {
 
+    private final TenantRepository tenantRepository;
+
+    public FlightMapper(TenantRepository tenantRepository) {
+        this.tenantRepository = tenantRepository;
+    }
+
     /**
-     * Преобразует объект Flight в FlightDTO
+     * Преобразует сущность Flight в DTO
      */
-    public FlightDTO toDto(Flight flight) {
+    public FlightDTO toDto(Flight flight, String companyId) {
         if (flight == null) {
             return null;
         }
@@ -20,50 +28,67 @@ public class FlightMapper {
         FlightDTO dto = new FlightDTO();
         dto.setId(flight.getId());
         dto.setFlightNumber(flight.getFlightNumber());
-        dto.setDepartureAirport(flight.getDepartureAirport());
-        dto.setArrivalAirport(flight.getArrivalAirport());
+        dto.setOrigin(flight.getOrigin());
+        dto.setDestination(flight.getDestination());
         dto.setDepartureTime(flight.getDepartureTime());
         dto.setArrivalTime(flight.getArrivalTime());
+        dto.setPrice(flight.getPrice());
         dto.setAvailableSeats(flight.getAvailableSeats());
-        dto.setBasePrice(flight.getBasePrice());
+        dto.setAircraft(flight.getAircraft());
+        dto.setCompanyId(companyId);
+
+        // Находим название компании
+        tenantRepository.findById(companyId).ifPresent(
+                tenant -> dto.setCompanyName(tenant.getDescription())
+        );
 
         return dto;
     }
 
     /**
-     * Преобразует CreateFlightDTO в Flight
+     * Преобразует список сущностей Flight в список DTO
      */
-    public Flight toEntity(CreateFlightDTO dto) {
+    public List<FlightDTO> toDtoList(List<Flight> flights, String companyId) {
+        if (flights == null) {
+            return List.of();
+        }
+
+        return flights.stream()
+                .map(flight -> toDto(flight, companyId))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Преобразует DTO в сущность Flight
+     */
+    public Flight toEntity(FlightDTO dto) {
         if (dto == null) {
             return null;
         }
 
         Flight flight = new Flight();
+        flight.setId(dto.getId());
         flight.setFlightNumber(dto.getFlightNumber());
-        flight.setDepartureAirport(dto.getDepartureAirport());
-        flight.setArrivalAirport(dto.getArrivalAirport());
+        flight.setOrigin(dto.getOrigin());
+        flight.setDestination(dto.getDestination());
         flight.setDepartureTime(dto.getDepartureTime());
         flight.setArrivalTime(dto.getArrivalTime());
+        flight.setPrice(dto.getPrice());
         flight.setAvailableSeats(dto.getAvailableSeats());
-        flight.setBasePrice(dto.getBasePrice());
-
+        flight.setAircraft(dto.getAircraft());
         return flight;
     }
 
     /**
-     * Обновляет Flight на основе UpdateFlightDTO
+     * Преобразует список DTO в список сущностей Flight
      */
-    public void updateFlightFromDto(UpdateFlightDTO dto, Flight flight) {
-        if (dto == null || flight == null) {
-            return;
+    public List<Flight> toEntityList(List<FlightDTO> dtos) {
+        if (dtos == null) {
+            return List.of();
         }
 
-        flight.setFlightNumber(dto.getFlightNumber());
-        flight.setDepartureAirport(dto.getDepartureAirport());
-        flight.setArrivalAirport(dto.getArrivalAirport());
-        flight.setDepartureTime(dto.getDepartureTime());
-        flight.setArrivalTime(dto.getArrivalTime());
-        flight.setAvailableSeats(dto.getAvailableSeats());
-        flight.setBasePrice(dto.getBasePrice());
+        return dtos.stream()
+                .map(this::toEntity)
+                .collect(Collectors.toList());
     }
 }
