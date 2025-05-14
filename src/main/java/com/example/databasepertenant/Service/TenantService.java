@@ -209,4 +209,39 @@ public class TenantService {
             }
         }
     }
+    /**
+     * Инициализировать отдельного тенанта и его репозиторий
+     */
+    public void initializeTenant(Tenant tenant) {
+        try {
+            String dbName = tenant.getDbName();
+            String tenantId = tenant.getId();
+
+            System.out.println("Инициализация тенанта: " + tenantId + " с БД: " + dbName);
+
+            // Создаем DataSource для БД тенанта
+            HikariDataSource tenantDataSource = createDataSource(dbName);
+
+            // Обновляем DataSource в TenantAwareDataSource
+            if (this.dataSource instanceof TenantAwareDataSource) {
+                ((TenantAwareDataSource) this.dataSource).addTenant(tenantId, tenantDataSource);
+            }
+
+            // Создаем EntityManagerFactory для тенанта
+            EntityManagerFactory emf = createEntityManagerFactory(tenantDataSource, tenantId);
+
+            // Создаем и регистрируем FlightRepository для тенанта
+            FlightRepository flightRepository = new FlightRepositoryImpl(emf);
+            flightRepositories.put(tenantId, flightRepository);
+
+            System.out.println("Тенант " + tenantId + " успешно инициализирован");
+        } catch (Exception e) {
+            System.err.println("Ошибка при инициализации тенанта " + tenant.getId() + ": " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public Map<String, FlightRepository> getFlightRepositories() {
+        return flightRepositories;
+    }
 }

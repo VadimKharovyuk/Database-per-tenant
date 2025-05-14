@@ -43,4 +43,7 @@ public class TenantAwareDataSource extends AbstractRoutingDataSource {
         // Переинициализируем
         super.afterPropertiesSet();
     }
+    public DataSource getDataSourceForTenant(String tenantId) {
+        return (DataSource) tenantDataSources.get(tenantId);
+    }
 }

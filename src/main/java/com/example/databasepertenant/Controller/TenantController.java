@@ -3,6 +3,7 @@ package com.example.databasepertenant.Controller;
 import com.example.databasepertenant.Service.TenantService;
 import com.example.databasepertenant.dto.TenantDTO;
 import com.example.databasepertenant.model.Tenant;
+import com.example.databasepertenant.repository.FlightRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -86,4 +87,42 @@ public class TenantController {
             ));
         }
     }
+
+    @PostMapping("/refresh-repositories")
+    public ResponseEntity<?> refreshRepositories() {
+        try {
+            // Получаем список всех активных тенантов
+            List<Tenant> tenants = tenantService.getAllTenants();
+
+            // Очищаем текущую карту репозиториев (внимание: используем правильную карту)
+            Map<String, FlightRepository> flightRepositories = tenantService.getFlightRepositories();
+            flightRepositories.clear();
+
+            // Для каждого тенанта создаем новый репозиторий
+            for (Tenant tenant : tenants) {
+                String tenantId = tenant.getId();
+                try {
+                    // Переинициализируем тенанта
+                    tenantService.initializeTenant(tenant);
+                    System.out.println("Репозиторий для тенанта " + tenantId + " успешно создан");
+                } catch (Exception e) {
+                    System.err.println("Ошибка при создании репозитория для тенанта " + tenantId + ": " + e.getMessage());
+                }
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Repositories refreshed successfully",
+                    "count", flightRepositories.size(),
+                    "repositories", flightRepositories.keySet()
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Error refreshing repositories: " + e.getMessage()
+            ));
+        }
+    }
+
 }

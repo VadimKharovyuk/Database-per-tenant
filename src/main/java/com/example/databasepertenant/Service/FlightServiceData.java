@@ -1,19 +1,27 @@
 package com.example.databasepertenant.Service;
 
+import com.example.databasepertenant.DataSource.TenantAwareDataSource;
 import com.example.databasepertenant.DataSource.TenantContext;
 import com.example.databasepertenant.dto.FlightDTO;
 import com.example.databasepertenant.maper.FlightMapper;
 import com.example.databasepertenant.model.Flight;
+import com.example.databasepertenant.model.Tenant;
 import com.example.databasepertenant.repository.FlightRepository;
+import com.example.databasepertenant.repository.TenantRepository;
+import com.zaxxer.hikari.HikariDataSource;
+import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+
+import static jakarta.persistence.Persistence.createEntityManagerFactory;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +29,7 @@ import java.util.Optional;
 public class FlightServiceData {
     private final Map<String, FlightRepository> flightRepositories;
     private final FlightMapper flightMapper;
+    private final TenantService tenantService;
 
     /**
      * Получить все рейсы из всех баз данных компаний
@@ -28,15 +37,26 @@ public class FlightServiceData {
     public List<FlightDTO> getAllFlights() {
         List<FlightDTO> allFlights = new ArrayList<>();
 
+        System.out.println("Доступно репозиториев: " + flightRepositories.size());
+        flightRepositories.keySet().forEach(key -> System.out.println("Ключ в репозиториях: " + key));
+
         for (Map.Entry<String, FlightRepository> entry : flightRepositories.entrySet()) {
             String companyId = entry.getKey();
+            System.out.println("Обрабатываем компанию: " + companyId);
 
             // Устанавливаем текущего тенанта перед выполнением запросов
             TenantContext.setCurrentTenant(companyId);
 
             try {
                 List<Flight> flights = entry.getValue().findAll();
+                System.out.println("Получено рейсов для компании " + companyId + ": " + flights.size());
                 allFlights.addAll(flightMapper.toDtoList(flights, companyId));
+            } catch (Exception e) {
+                // Логируем ошибку, но продолжаем обработку других репозиториев
+                System.err.println("Ошибка при получении рейсов для компании " + companyId + ": " + e.getMessage());
+                // Удаляем проблемный репозиторий из карты
+                flightRepositories.remove(companyId);
+                System.out.println("Репозиторий для компании " + companyId + " удален из-за ошибки");
             } finally {
                 // Очищаем контекст тенанта после выполнения
                 TenantContext.clear();
