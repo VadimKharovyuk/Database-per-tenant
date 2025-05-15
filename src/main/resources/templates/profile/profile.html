@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Личный кабинет</title>
+</head>
+<body>
+<h1>Личный кабинет</h1>
+
+<div class="user-info">
+    <h2>Информация о пользователе</h2>
+    <p>Имя пользователя: <span th:text="${user.username}"></span></p>
+    <p>Email: <span th:text="${user.email}"></span></p>
+    <p>Имя: <span th:text="${user.firstName}"></span></p>
+    <p>Фамилия: <span th:text="${user.lastName}"></span></p>
+</div>
+
+<div class="bookings">
+    <h2>Мои бронирования</h2>
+    <table th:if="${not #lists.isEmpty(bookings)}">
+        <thead>
+        <tr>
+            <th>Номер бронирования</th>
+            <th>Рейс</th>
+            <th>Дата бронирования</th>
+            <th>Статус</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="booking : ${bookings}">
+            <td th:text="${booking.id}"></td>
+            <td th:text="${booking.flightId}"></td>
+<!--            <td th:text="${#temporals.format(booking.bookingDate, 'dd.MM.yyyy HH:mm')}"></td>-->
+            <td th:text="${booking.getSeatNumber()}"></td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(bookings)}">У вас пока нет бронирований</p>
+</div>
+</body>
+</html>

@@ -10,7 +10,10 @@ import com.example.databasepertenant.repository.FlightRepository;
 import com.example.databasepertenant.repository.TenantRepository;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +23,10 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static jakarta.persistence.Persistence.createEntityManagerFactory;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -204,6 +208,55 @@ public class FlightServiceData {
             repository.deleteById(flightId);
             return true;
         } finally {
+            TenantContext.clear();
+        }
+    }
+
+    public Flight getFlightEntity(Long flightId, String tenantId) {
+        // Получаем репозиторий для конкретного тенанта
+        FlightRepository repository = flightRepositories.get(tenantId);
+
+        if (repository == null) {
+            throw new RuntimeException("Репозиторий для тенанта не найден: " + tenantId);
+        }
+
+        // Устанавливаем контекст тенанта
+        TenantContext.setCurrentTenant(tenantId);
+
+        try {
+            // Ищем рейс по ID
+            return repository.findById(flightId)
+                    .orElseThrow(() -> new RuntimeException("Рейс не найден: ID " + flightId + " в тенанте " + tenantId));
+        } finally {
+            // Всегда очищаем контекст тенанта
+            TenantContext.clear();
+        }
+    }
+
+    public Optional<FlightDTO> getFlightById(Long flightId) {
+        // Получаем текущий tenant ID
+        String currentTenantId = TenantContext.getCurrentTenant();
+
+        if (currentTenantId == null) {
+            throw new RuntimeException("Tenant ID не определен");
+        }
+
+        // Получаем репозиторий для текущего тенанта
+        FlightRepository repository = flightRepositories.get(currentTenantId);
+
+        if (repository == null) {
+            throw new RuntimeException("Репозиторий для тенанта не найден: " + currentTenantId);
+        }
+
+        try {
+            return repository.findById(flightId)
+                    .map(flight -> flightMapper.toDto(flight, currentTenantId));
+        } catch (Exception e) {
+            // Логирование ошибки
+            log.error("Ошибка при поиске рейса", e);
+            throw new RuntimeException("Ошибка при поиске рейса", e);
+        } finally {
+            // Очищаем контекст тенанта
             TenantContext.clear();
         }
     }

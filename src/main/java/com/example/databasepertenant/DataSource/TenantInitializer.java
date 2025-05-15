@@ -7,6 +7,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.context.annotation.DependsOn;
 
@@ -20,45 +21,22 @@ public class TenantInitializer implements ApplicationRunner {
     private final TenantRepository tenantRepository;
     private final DataSource dataSource;
     private final TenantService tenantService;
+    private final JdbcTemplate jdbcTemplate;
 
     public TenantInitializer(TenantRepository tenantRepository,
-                             @Qualifier("tenantDataSource") DataSource dataSource , TenantService tenantService) {
+                             @Qualifier("tenantDataSource") DataSource dataSource ,
+                             TenantService tenantService ,JdbcTemplate jdbcTemplate) {
         this.tenantRepository = tenantRepository;
         this.dataSource = dataSource;
         this.tenantService =tenantService ;
+        this.jdbcTemplate = jdbcTemplate;
     }
-
-//    @Override
-//    public void run(ApplicationArguments args) throws Exception {
-//        try {
-//            List<Tenant> tenants = tenantRepository.findAll();
-//
-//            if (dataSource instanceof TenantAwareDataSource) {
-//                TenantAwareDataSource tenantAwareDataSource = (TenantAwareDataSource) dataSource;
-//
-//                for (Tenant tenant : tenants) {
-//                    try {
-//                        HikariDataSource ds = new HikariDataSource();
-//                        ds.setJdbcUrl("jdbc:postgresql://localhost:5432/" + tenant.getDbName());
-//                        ds.setUsername("postgres");
-//                        ds.setPassword("password");
-//
-//                        tenantAwareDataSource.addTenant(tenant.getId(), ds);
-//
-//                        System.out.println("Инициализирован тенант: " + tenant.getId() + " с БД: " + tenant.getDbName());
-//                    } catch (Exception e) {
-//                        System.err.println("Ошибка при инициализации тенанта " + tenant.getId() + ": " + e.getMessage());
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            System.err.println("Ошибка при инициализации тенантов: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//    }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        // Создаем таблицы в основной базе данных
+        createMasterDatabaseTables();
+
         try {
             // Получаем список всех тенантов из репозитория
             List<Tenant> tenants = tenantRepository.findAll();
@@ -80,10 +58,54 @@ public class TenantInitializer implements ApplicationRunner {
                 }
             }
         } catch (Exception e) {
-            // Обработка общих ошибок при инициализации тенантов
             System.err.println("Ошибка при инициализации тенантов: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void createMasterDatabaseTables() {
+        // Создание таблицы ролей
+        jdbcTemplate.execute("""
+            CREATE TABLE IF NOT EXISTS roles (
+                id BIGSERIAL PRIMARY KEY,
+                name VARCHAR(50) NOT NULL UNIQUE,
+                description VARCHAR(255)
+            )
+        """);
+
+        // Добавление базовых ролей, если их еще нет
+        jdbcTemplate.update("""
+            INSERT INTO roles (name, description) 
+            VALUES 
+            ('ROLE_USER', 'Стандартный пользователь'),
+            ('ROLE_ADMIN', 'Администратор системы'),
+            ('ROLE_PASSENGER', 'Пассажир')
+            ON CONFLICT (name) DO NOTHING
+        """);
+
+        // Создание таблицы пользователей
+        jdbcTemplate.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id BIGSERIAL PRIMARY KEY,
+                username VARCHAR(50) NOT NULL UNIQUE,
+                email VARCHAR(100) NOT NULL UNIQUE,
+                password_hash VARCHAR(255) NOT NULL,
+                first_name VARCHAR(50),
+                last_name VARCHAR(50),
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """);
+
+        // Создание таблицы связи пользователей и ролей
+        jdbcTemplate.execute("""
+            CREATE TABLE IF NOT EXISTS user_roles (
+                user_id BIGINT REFERENCES users(id),
+                role_id BIGINT REFERENCES roles(id),
+                PRIMARY KEY (user_id, role_id)
+            )
+        """);
     }
 
 }

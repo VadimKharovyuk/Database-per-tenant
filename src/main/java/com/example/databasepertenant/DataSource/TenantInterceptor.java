@@ -13,10 +13,10 @@ public class TenantInterceptor implements HandlerInterceptor {
         String tenantId = request.getHeader("X-Tenant-ID");
         if (tenantId != null) {
             TenantContext.setTenantId(tenantId);
-            System.out.println("Set tenant ID: " + tenantId);
+//            System.out.println("Set tenant ID: " + tenantId);
         } else {
-            System.out.println("No X-Tenant-ID header found in request to: " + request.getRequestURI());
-            // Устанавливаем default для запросов без заголовка
+//            System.out.println("No X-Tenant-ID header found in request to: " + request.getRequestURI());
+//            // Устанавливаем default для запросов без заголовка
             TenantContext.setTenantId("default");
         }
         return true;

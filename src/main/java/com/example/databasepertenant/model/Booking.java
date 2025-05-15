@@ -21,13 +21,16 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    // ID пользователя из общей базы данных
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @ManyToOne
     @JoinColumn(name = "flight_id", nullable = false)
     private Flight flight;
+
+    @Column(name = "tenant_id", nullable = false)
+    private String tenantId; // ID тенанта (авиакомпании)
 
     @Column(nullable = false)
     private String passengerName;
@@ -44,21 +47,5 @@ public class Booking {
     @Column(nullable = false)
     private LocalDateTime bookingTime;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        bookingTime = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

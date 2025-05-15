@@ -12,8 +12,11 @@ import java.util.Set;
 public class CreateUserDTO {
     private String username;
     private String email;
+
     private String password;
+
     private String firstName;
     private String lastName;
+
     private Set<String> roles;
 }
