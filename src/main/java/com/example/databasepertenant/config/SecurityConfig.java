@@ -19,7 +19,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final UserDetailsService userDetailsService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -41,11 +40,11 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/debug/**",
                                 "/api/**",
+                                "/bookings/**",
                                 "/api/flights/**",
                                 "/login/**",
                                 "/flights/**",
                                 "/profile/**",
-                                "/register/**",
                                 "/register/**",
                                 "/flights/**"
                                 ,"/")

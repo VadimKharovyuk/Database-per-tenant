@@ -234,30 +234,46 @@ public class FlightServiceData {
     }
 
     public Optional<FlightDTO> getFlightById(Long flightId) {
-        // Получаем текущий tenant ID
-        String currentTenantId = TenantContext.getCurrentTenant();
+        // Получаем список всех тенантов
+        List<String> tenantIds = new ArrayList<>(flightRepositories.keySet());
 
-        if (currentTenantId == null) {
-            throw new RuntimeException("Tenant ID не определен");
+        // Если список тенантов пуст, выбрасываем исключение
+        if (tenantIds.isEmpty()) {
+            throw new RuntimeException("Нет доступных тенантов");
         }
 
-        // Получаем репозиторий для текущего тенанта
-        FlightRepository repository = flightRepositories.get(currentTenantId);
+        // Перебираем всех тенантов
+        for (String tenantId : tenantIds) {
+            try {
+                // Устанавливаем контекст тенанта
+                TenantContext.setCurrentTenant(tenantId);
 
-        if (repository == null) {
-            throw new RuntimeException("Репозиторий для тенанта не найден: " + currentTenantId);
+                // Получаем репозиторий для тенанта
+                FlightRepository repository = flightRepositories.get(tenantId);
+
+                // Проверяем наличие репозитория
+                if (repository == null) {
+                    log.warn("Репозиторий для тенанта {} не найден", tenantId);
+                    continue;
+                }
+
+                // Ищем рейс
+                Optional<Flight> flight = repository.findById(flightId);
+
+                // Если рейс найден, возвращаем его
+                if (flight.isPresent()) {
+                    return flight.map(f -> flightMapper.toDto(f, tenantId));
+                }
+            } catch (Exception e) {
+                // Логируем ошибки для каждого тенанта
+                log.error("Ошибка при поиске рейса в тенанте {}: ", tenantId, e);
+            } finally {
+                // Очищаем контекст тенанта
+                TenantContext.clear();
+            }
         }
 
-        try {
-            return repository.findById(flightId)
-                    .map(flight -> flightMapper.toDto(flight, currentTenantId));
-        } catch (Exception e) {
-            // Логирование ошибки
-            log.error("Ошибка при поиске рейса", e);
-            throw new RuntimeException("Ошибка при поиске рейса", e);
-        } finally {
-            // Очищаем контекст тенанта
-            TenantContext.clear();
-        }
+        // Если рейс не найден ни в одном тенанте
+        return Optional.empty();
     }
 }

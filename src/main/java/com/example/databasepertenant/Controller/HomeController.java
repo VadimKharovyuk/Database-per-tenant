@@ -14,8 +14,6 @@ import java.util.List;
 @Controller()
 public class HomeController {
 
-    private final FlightServiceData flightServiceData;
-
     private final TenantService tenantService;
 
     @GetMapping()

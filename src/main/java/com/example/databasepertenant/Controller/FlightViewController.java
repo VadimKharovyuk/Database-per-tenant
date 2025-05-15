@@ -110,6 +110,10 @@ public class FlightViewController {
             Model model
     ) {
         try {
+
+            List<FlightDTO> flights = flightServiceData.getAllFlights();
+            model.addAttribute("flights", flights);
+
             flightServiceData.getFlightDetails(companyId, flightId)
                     .ifPresentOrElse(
                             flight -> {

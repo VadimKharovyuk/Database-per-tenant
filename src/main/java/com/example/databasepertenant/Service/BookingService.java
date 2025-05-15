@@ -34,17 +34,16 @@ public class BookingService {
 
     @Transactional
     public BookingDTO createBooking(BookingDTO bookingDTO) {
-        // Проверяем пользователя в общей базе
+        // Получаем пользователя в общей базе
         User user = userService.getUserById(bookingDTO.getUserId())
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
         // Получаем рейс и его тенант
-        Optional<FlightDTO> flightDTOOptional = flightServiceData.getFlightById(bookingDTO.getFlightId());
-        FlightDTO flightDTO = flightDTOOptional
+        FlightDTO flightDTO = flightServiceData.getFlightById(bookingDTO.getFlightId())
                 .orElseThrow(() -> new RuntimeException("Рейс не найден"));
 
         // Получаем ID тенанта
-        String tenantId = flightDTO.getCompanyId();
+        String tenantId = bookingDTO.getCompanyId(); // Используем companyId из DTO
 
         // Получаем репозиторий для тенанта рейса
         BookingRepository tenantBookingRepository = bookingRepositories.get(tenantId);
@@ -72,11 +71,12 @@ public class BookingService {
             // Сохраняем бронирование в базе данных тенанта
             Booking savedBooking = tenantBookingRepository.save(booking);
 
+            // Преобразуем и возвращаем DTO
+            BookingDTO resultDto = bookingMapper.toDto(savedBooking);
+            resultDto.setCompanyId(tenantId);
 
-
-            return bookingMapper.toDto(savedBooking);
+            return resultDto;
         } catch (Exception e) {
-            // Логирование ошибки
             log.error("Ошибка при создании бронирования: ", e);
             throw e;
         } finally {
@@ -107,7 +107,7 @@ public class BookingService {
                 userBookings.addAll(
                         tenantBookings.stream()
                                 .map(bookingMapper::toDto)
-                                .collect(Collectors.toList())
+                                .toList()
                 );
             } catch (Exception e) {
                 log.error("Ошибка при получении бронирований для тенанта {}: ", tenantId, e);
